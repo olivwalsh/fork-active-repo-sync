@@ -1,0 +1,25 @@
+name: sync-fork
+
+on:
+  schedule:
+    # 5 minutes is the shortest interval GitHub allows; runs can be delayed or skipped
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sync-fork
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sync the fork with its upstream
+        env:
+          # Personal access token with write access to the fork's contents and workflows.
+          # The default GITHUB_TOKEN cannot push upstream commits that change .github/workflows.
+          GH_TOKEN: ${{ secrets.SYNC_PAT }}
+        run: gh repo sync olivwalsh/fork-active-repo-test --source home-assistant/core --branch dev
